@@ -229,14 +229,22 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
                 GuiElementBox g;
                 if (ob instanceof Grass)
                 {
-                    g = new GuiElementBox(ob,"grass");
+                    g = new GuiElementBox(ob,1);
+                    b = g.getVBox();
+                    grid.add(b,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
+                    b.setAlignment(Pos.CENTER);
                 }
                 else{
-                    g = new GuiElementBox( ob,ob.getPosition().toString());
+                    g = new GuiElementBox( ob,1);
+                    GuiElementBox g2 = new GuiElementBox(ob, 2);
+                    VBox b1 = g.getVBox();
+                    VBox b2 = g2.getVBox();
+                    VBox a = new VBox(b1,b2);
+                    a.setAlignment(Pos.CENTER);
+                    grid.add(a,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
+                    a.setAlignment(Pos.CENTER);
                 }
-                b = g.getVBox();
-                grid.add(b,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
-                b.setAlignment(Pos.CENTER);
+
             }
         }
 
@@ -251,6 +259,8 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         }
 
     }
+
+
 
 
 }

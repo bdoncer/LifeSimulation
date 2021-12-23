@@ -10,6 +10,7 @@ public class RectangularMap extends AbstractWorldMap implements IWorldMap {
         this.startEnergy = startEnergy;
         this.moveEnergy = moveEnergy;
         this.plantEnergy = plantEnergy;
+
     }
     @Override
     public boolean canMoveTo(Vector2d position) {

@@ -14,16 +14,23 @@ import java.io.FileNotFoundException;
 
 public class GuiElementBox {
     VBox b;
-    public GuiElementBox(IMapElement ob, String label){
+    public GuiElementBox(IMapElement ob,int type){
         try{
-            String url = ob.getUrl();
+            String url;
+            //chcemy obrazek
+            if (type == 1){
+                url = ob.getUrl();
+            }
+            //chcemy energie
+            else{
+                url = ob.getEnergyUrl();
+            }
             Image image = new Image(new FileInputStream(url));
             ImageView pic = new ImageView();
             pic.setFitWidth(20);
             pic.setFitHeight(20);
             pic.setImage(image);
-            Label l = new Label(label);
-            b = new VBox(pic,l);
+            b = new VBox(pic);
             b.setAlignment(Pos.CENTER);
         }
         catch(FileNotFoundException ex) {

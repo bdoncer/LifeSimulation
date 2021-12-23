@@ -5,4 +5,6 @@ public interface IMapElement {
     public String getUrl();
 
     int getEnergy();
+
+    String getEnergyUrl();
 }

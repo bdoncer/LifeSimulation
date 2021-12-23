@@ -1,16 +1,35 @@
 package agh.ics.oop;
 
+import java.util.Arrays;
+
 public class Animal extends AbstractWorldMapElement{
+    private final Animal parent1;
+    private final Animal parent2;
     private MapDirection orientation = MapDirection.N;
-    private IWorldMap map;
+    private final IWorldMap map;
     int energy;
     Integer[] genes = new Integer[32];
 
-    public Animal(IWorldMap map,Vector2d initialPosition){
+    public Animal(IWorldMap map,Vector2d initialPosition,String type,Animal parent1,Animal parent2){
         this.position = initialPosition;
         this.map = map;
         this.energy = this.map.getStartEnergy();
-        this.makeGenes();
+        this.parent1 = parent1;
+        this.parent2 = parent2;
+        //jesli zwierze jest startowe
+        if (type.equals("s"))
+        {
+            this.makeGenes();
+        }
+        //jesli zwierze urodzilo sie w czasie symulacji
+        if (type.equals("c")){
+            this.makeChildrenGenes();
+        }
+        //DO ZMIANY!!!!
+        else{
+            this.makeGenes();
+        }
+
     }
     public MapDirection getOrientation(){
         return this.orientation;
@@ -24,6 +43,58 @@ public class Animal extends AbstractWorldMapElement{
         for (int i=0;i<32;i++){
             this.genes[i] = getRandomNumber(0,8);
         }
+    }
+    private void makeChildrenGenes() {
+        int allEnergy = parent1.energy + parent2.energy;
+        float p1Per = parent1.energy / allEnergy;
+        System.out.println((allEnergy));
+
+        //System.out.println((parent1.energy/allEnergy));
+        System.out.println((p1Per));
+        float p2Per = 32 - p1Per;
+        int half = getRandomNumber(0,1);
+        //System.out.println(half);
+        /*int p1Start;
+        int p2Start;
+        if(p1Per > p2Per){
+            if(half == 0){
+                p1Start = 0;
+                p2Start = p1Per;
+            }
+            else{
+                p2Start = 0;
+                p1Start = p2Per;
+            }
+        }
+        else{
+            if(half == 0){
+                p2Start = 0;
+                p1Start = p2Per;
+            }
+            else{
+                p1Start = 0;
+                p2Start = p1Per;
+            }
+        }
+        for(int i = p1Start; i<p1Start+p1Per;i++){
+            this.genes[i] = parent1.genes[i];
+        }
+        for(int i = p2Start; i<p2Start+p2Per;i++){
+            this.genes[i] = parent2.genes[i];
+        }*/
+        /*System.out.println("rodzic 1");
+        System.out.println((parent1.energy));
+        System.out.println((p1Per));
+        //System.out.println((p1Start));
+        System.out.println(Arrays.toString(parent1.genes));
+        System.out.println("rodzic 2");
+        System.out.println((parent2.energy));
+        System.out.println((p2Per));
+        //System.out.println((p2Start));
+        System.out.println(Arrays.toString(parent2.genes));
+        System.out.println("dziecko");
+        System.out.println(Arrays.toString(this.genes));*/
+
     }
     public int getEnergy(){
         return this.energy;
@@ -174,7 +245,22 @@ public class Animal extends AbstractWorldMapElement{
         return null;
     }
 
-
-
-
+    public String getEnergyUrl(){
+        int maxEnergy =  this.map.getStartEnergy();
+        if (this.energy <= 0.2*maxEnergy){
+            return "src/main/resources/energy1.jpg";
+        }
+        else if (this.energy <= 0.4*maxEnergy){
+            return "src/main/resources/energy2.jpg";
+        }
+        else if (this.energy <= 0.6*maxEnergy){
+            return "src/main/resources/energy3.jpg";
+        }
+        else if (this.energy <= 0.8*maxEnergy){
+            return "src/main/resources/energy4.jpg";
+        }
+        else{
+            return "src/main/resources/energy5.jpg";
+        }
+    }
 }

@@ -12,6 +12,9 @@ public class WelcomeScreen {
     TextArea heightText = new TextArea("8");
     TextArea jungleRatioText = new TextArea("0.2");
     TextArea startEnergyText = new TextArea("10");
+    TextArea moveEnergyText = new TextArea("1");
+    TextArea plantEnergyText = new TextArea("2");
+    TextArea startAnimalsText = new TextArea("3");
     public WelcomeScreen(App app){
         Button startButton = new Button("Rozpocznij symulacje :))");
         startButton.setOnAction(event -> {
@@ -29,7 +32,13 @@ public class WelcomeScreen {
                 new Label("Jungle Ratio: "),
                 jungleRatioText,
                 new Label("start energy"),
-                startEnergyText
+                startEnergyText,
+                new Label("move energy"),
+                moveEnergyText,
+                new Label("plant energy"),
+                plantEnergyText,
+                new Label("start animals"),
+                startAnimalsText
         );
         welcomeScreen.getChildren().add(startButton);
         welcomeScreen.setAlignment(Pos.CENTER);
@@ -39,20 +48,32 @@ public class WelcomeScreen {
         return welcomeScreen;
     }
 
-    public int getWidth(){
+    public int giveWidth(){
         return Integer.parseInt(widthText.getText());
     }
 
-    public int getHeight(){
+    public int giveHeight(){
         return Integer.parseInt(heightText.getText());
     }
 
-    public float getJungleRatio(){
+    public float giveJungleRatio(){
         return Float.parseFloat(jungleRatioText.getText());
     }
 
-    public int getStartEnergy(){
+    public int giveStartEnergy(){
         return Integer.parseInt(startEnergyText.getText());
+    }
+
+    public int giveMoveEnergy(){
+        return Integer.parseInt(moveEnergyText.getText());
+    }
+
+    public int givePlantEnergy(){
+        return Integer.parseInt(plantEnergyText.getText());
+    }
+
+    public int giveStartAnimals(){
+        return Integer.parseInt(startAnimalsText.getText());
     }
 
 

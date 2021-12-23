@@ -7,20 +7,26 @@ import java.util.List;
 public class SimulationEngine implements IEngine,Runnable{
     private MoveDirection[] moves;
     private IWorldMap map;
-    private Vector2d[] positions;
     protected List<IEngineMoveObserver> observers = new ArrayList<>();
     int moveDelay;
     ArrayList<Animal> animals = new ArrayList<Animal>();
-    public SimulationEngine(IWorldMap map,Vector2d[] positions,int moveDelay){
+    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay){
         this.map = map;
-        this.positions = positions;
         this.moveDelay = moveDelay;
         this.moves = moves;
-        for(Vector2d pos:positions){
-            Animal animal = new Animal(map,pos);
+        int width = map.getWidth();
+        int height = map.getHeight();
+
+        for(int i = 0;i<startAnimals;i++){
+            int x = getRandomNumber(0,width);
+            int y = getRandomNumber(0,height);
+            Animal animal = new Animal(map,new Vector2d(x,y),"s",null,null);
             map.place(animal);
             animals.add(animal);
         }
+    }
+    public int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
     }
     public void movesSetter(MoveDirection[] moves){
         this.moves = moves;
@@ -41,10 +47,16 @@ public class SimulationEngine implements IEngine,Runnable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            animals.get(j).move(moves[i]);
+            if (animals.size() > 0){
+                animals.get(j).move(moves[i]);
+            }
+
 
             //zmniejszam mu energie, ktora zuzyl na ruch
-            animals.get(j).energy = animals.get(j).energy - map.getMoveEnergy();
+            if (animals.size() > 0){
+                animals.get(j).energy -= map.getMoveEnergy();
+            }
+
             //
             j+=1;
             if (j == animals.size()){
@@ -85,7 +97,8 @@ public class SimulationEngine implements IEngine,Runnable{
                 ArrayList<Animal> animalsToAdd = new ArrayList<>();
                 for (Vector2d pos: map.getmapElements().keySet()){
                     if (map.getParents(pos) != null){
-                        Animal child = new Animal(map,pos);
+                        Animal[] parents = map.getParents(pos);
+                        Animal child = new Animal(map,pos,"c",parents[0],parents[1]);
                         animalsToAdd.add(child);
                     }
                 }

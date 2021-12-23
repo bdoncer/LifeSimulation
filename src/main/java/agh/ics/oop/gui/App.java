@@ -55,11 +55,12 @@ public class App extends Application implements IEngineMoveObserver {
             map.drawGridPane(grid); });
     }
     public void startSimulation(){
-        map = new BendedMap(welcomeScreen.getWidth(), welcomeScreen.getHeight(), welcomeScreen.getJungleRatio(), welcomeScreen.getStartEnergy(), 5,2);
+        map = new BendedMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
+                welcomeScreen.giveMoveEnergy(),welcomeScreen.givePlantEnergy());
 
 
         Vector2d[] positions = {new Vector2d(1,1),new Vector2d(1,2)};
-        engine = new SimulationEngine(map, positions, 1000);
+        engine = new SimulationEngine(map, welcomeScreen.giveStartAnimals(),500);
         engine.addObserver(this);
 
         TextField text = new TextField();
