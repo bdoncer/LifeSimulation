@@ -15,6 +15,7 @@ public class WelcomeScreen {
     TextArea moveEnergyText = new TextArea("1");
     TextArea plantEnergyText = new TextArea("2");
     TextArea startAnimalsText = new TextArea("3");
+    TextArea isMagicText = new TextArea("False");
     public WelcomeScreen(App app){
         Button startButton = new Button("Rozpocznij symulacje :))");
         startButton.setOnAction(event -> {
@@ -38,7 +39,10 @@ public class WelcomeScreen {
                 new Label("plant energy"),
                 plantEnergyText,
                 new Label("start animals"),
-                startAnimalsText
+                startAnimalsText,
+                new Label("turn on magical mode? (True/False)"),
+                isMagicText
+
         );
         welcomeScreen.getChildren().add(startButton);
         welcomeScreen.setAlignment(Pos.CENTER);
@@ -74,6 +78,10 @@ public class WelcomeScreen {
 
     public int giveStartAnimals(){
         return Integer.parseInt(startAnimalsText.getText());
+    }
+
+    public boolean giveIsMagic(){
+        return Boolean.parseBoolean(isMagicText.getText());
     }
 
 

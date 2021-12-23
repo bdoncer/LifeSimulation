@@ -44,18 +44,18 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     public Vector2d jungleLowerLeft(){
         int area = (width+1)*(height+1);
         int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
-        int jungleSide = (int) Math.sqrt(jungleArea);
-        //System.out.print(new Vector2d((int) (width+1)/2-jungleSide/2,(int) (height+1)/2-jungleSide/2).toString());
-        return new Vector2d((int) (width+1)/2-jungleSide/2,(int) (height+1)/2-jungleSide/2);
+        int jungleWidth = (int) Math.sqrt((jungleArea*(width+1))/(height+1));
+        int jungleHeight = jungleArea/jungleWidth;
+        System.out.print(new Vector2d((int) (width+1)/2-jungleWidth/2,(int) (height+1)/2-jungleHeight/2).toString());
+        return new Vector2d((int) (width+1)/2-jungleWidth/2,(int) (height+1)/2-jungleHeight/2);
     }
     public Vector2d jungleUpperRight(){
         Vector2d tmp = this.jungleLowerLeft();
         int area = (width+1)*(height+1);
         int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
-        int jungleSide = (int) Math.sqrt(jungleArea);
-        /*System.out.println(jungleSide);
-        System.out.println(new Vector2d((int) tmp.x+jungleSide-1,(int) tmp.y+jungleSide-1));*/
-        return new Vector2d((int) tmp.x+jungleSide-1,(int) tmp.y+jungleSide-1);
+        int jungleWidth = (int) Math.sqrt((jungleArea*width)/height);
+        int jungleHeight = jungleArea/jungleWidth;
+        return new Vector2d((int) tmp.x+jungleWidth-1,(int) tmp.y+jungleHeight-1);
     }
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
@@ -155,7 +155,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     public ArrayList<Animal> getBest(Vector2d position){
         ArrayList<Animal> strongest = new ArrayList<>();
         ArrayList<IMapElement> el= mapElements.get(position);
-        int maxEnergy = 0;
+        float maxEnergy = 0;
         for (IMapElement ob:el){
             if (ob instanceof Animal && ob.getEnergy() > maxEnergy){
                 maxEnergy = ob.getEnergy();

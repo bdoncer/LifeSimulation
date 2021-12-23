@@ -1,33 +1,44 @@
 package agh.ics.oop;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class Animal extends AbstractWorldMapElement{
     private final Animal parent1;
     private final Animal parent2;
-    private MapDirection orientation = MapDirection.N;
+    private MapDirection orientation;
     private final IWorldMap map;
-    int energy;
+    float energy;
     Integer[] genes = new Integer[32];
 
-    public Animal(IWorldMap map,Vector2d initialPosition,String type,Animal parent1,Animal parent2){
+    public Animal(IWorldMap map,Vector2d initialPosition,String type,Animal parent1,Animal parent2,Animal toCopy){
         this.position = initialPosition;
         this.map = map;
-        this.energy = this.map.getStartEnergy();
         this.parent1 = parent1;
         this.parent2 = parent2;
+        MapDirection[] options = {MapDirection.N,MapDirection.NE,MapDirection.E,MapDirection.SE,
+                MapDirection.S,MapDirection.SW,MapDirection.W,MapDirection.NW};
+        int option = getRandomNumber(0,8);
+        this.orientation = options[option];
         //jesli zwierze jest startowe
         if (type.equals("s"))
         {
             this.makeGenes();
+            this.energy = this.map.getStartEnergy();
         }
         //jesli zwierze urodzilo sie w czasie symulacji
         if (type.equals("c")){
             this.makeChildrenGenes();
+            this.energy = (float) (1/4)* parent1.energy + (1/4)* parent2.energy;
         }
-        //DO ZMIANY!!!!
-        else{
-            this.makeGenes();
+        //jesli zwierze jest kopia
+        if (type.equals("copy")){
+            for(int i = 0;i<32;i++){
+                this.genes[i] = toCopy.genes[i];
+            }
+            this.energy = this.map.getStartEnergy();
         }
 
     }
@@ -45,58 +56,40 @@ public class Animal extends AbstractWorldMapElement{
         }
     }
     private void makeChildrenGenes() {
-        int allEnergy = parent1.energy + parent2.energy;
+        float allEnergy = parent1.energy + parent2.energy;
         float p1Per = parent1.energy / allEnergy;
-        System.out.println((allEnergy));
-
-        //System.out.println((parent1.energy/allEnergy));
-        System.out.println((p1Per));
-        float p2Per = 32 - p1Per;
-        int half = getRandomNumber(0,1);
-        //System.out.println(half);
-        /*int p1Start;
-        int p2Start;
-        if(p1Per > p2Per){
-            if(half == 0){
-                p1Start = 0;
-                p2Start = p1Per;
+        float p2Per = 1 - p1Per;
+        int p1Space = 0;
+        float i = 0;
+        while (i<p1Per){
+            p1Space += 1;
+            i += (float) 1/32;
+        }
+        int p2Space = 32 - p1Space;
+        int half = getRandomNumber(0,2);
+        //najpierw bierzemy od rodzica 1 a potem od rodzica 2
+        if((p1Per > p2Per && half == 0) || (p1Per < p2Per && half == 1)){
+            for(int j = 0; j<p1Space;j++){
+                this.genes[j] = parent1.genes[j];
             }
-            else{
-                p2Start = 0;
-                p1Start = p2Per;
+            for(int j = p1Space; j<32;j++){
+                this.genes[j] = parent2.genes[j];
             }
         }
+        //najpierw bierzemy od rodzica 2 a potem od rodzica 1
         else{
-            if(half == 0){
-                p2Start = 0;
-                p1Start = p2Per;
+            for(int j = 0; j<p2Space;j++){
+                this.genes[j] = parent2.genes[j];
             }
-            else{
-                p1Start = 0;
-                p2Start = p1Per;
+            for(int j = p2Space; j<32;j++){
+                this.genes[j] = parent1.genes[j];
             }
         }
-        for(int i = p1Start; i<p1Start+p1Per;i++){
-            this.genes[i] = parent1.genes[i];
-        }
-        for(int i = p2Start; i<p2Start+p2Per;i++){
-            this.genes[i] = parent2.genes[i];
-        }*/
-        /*System.out.println("rodzic 1");
-        System.out.println((parent1.energy));
-        System.out.println((p1Per));
-        //System.out.println((p1Start));
-        System.out.println(Arrays.toString(parent1.genes));
-        System.out.println("rodzic 2");
-        System.out.println((parent2.energy));
-        System.out.println((p2Per));
-        //System.out.println((p2Start));
-        System.out.println(Arrays.toString(parent2.genes));
-        System.out.println("dziecko");
-        System.out.println(Arrays.toString(this.genes));*/
-
+        //rodzice musza stracic energie na dziecko
+        parent1.energy = (3/4)*parent1.energy;
+        parent2.energy = (3/4)*parent2.energy;
     }
-    public int getEnergy(){
+    public float getEnergy(){
         return this.energy;
     }
 

@@ -1,8 +1,5 @@
 package agh.ics.oop;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Grass extends AbstractWorldMapElement {
     public Grass(Vector2d position){
         this.position = position;
@@ -16,7 +13,7 @@ public class Grass extends AbstractWorldMapElement {
     public String getEnergyUrl(){
         return " ";
     }
-    public int getEnergy(){
+    public float getEnergy(){
         return 0;
     }
 }

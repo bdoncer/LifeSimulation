@@ -60,7 +60,7 @@ public class App extends Application implements IEngineMoveObserver {
 
 
         Vector2d[] positions = {new Vector2d(1,1),new Vector2d(1,2)};
-        engine = new SimulationEngine(map, welcomeScreen.giveStartAnimals(),500);
+        engine = new SimulationEngine(map, welcomeScreen.giveStartAnimals(),500,welcomeScreen.giveIsMagic());
         engine.addObserver(this);
 
         TextField text = new TextField();

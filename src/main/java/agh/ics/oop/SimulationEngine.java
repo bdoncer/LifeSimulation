@@ -5,24 +5,35 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SimulationEngine implements IEngine,Runnable{
+    private final int startAnimals;
     private MoveDirection[] moves;
     private IWorldMap map;
     protected List<IEngineMoveObserver> observers = new ArrayList<>();
     int moveDelay;
+    boolean magic;
     ArrayList<Animal> animals = new ArrayList<Animal>();
-    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay){
+    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay,boolean isMagic){
         this.map = map;
         this.moveDelay = moveDelay;
         this.moves = moves;
+        this.magic = isMagic;
+        this.startAnimals = startAnimals;
         int width = map.getWidth();
         int height = map.getHeight();
 
-        for(int i = 0;i<startAnimals;i++){
-            int x = getRandomNumber(0,width);
-            int y = getRandomNumber(0,height);
-            Animal animal = new Animal(map,new Vector2d(x,y),"s",null,null);
-            map.place(animal);
-            animals.add(animal);
+        //umieszczam poczatkowe zwierzeta
+        int i = 0;
+        while(i<startAnimals){
+            int x = getRandomNumber(0,width+1);
+            int y = getRandomNumber(0,height+1);
+            Vector2d pos = new Vector2d(x,y);
+            if (!map.isOccupied(pos)){
+                Animal animal = new Animal(map,new Vector2d(x,y),"s",null,null,null);
+                map.place(animal);
+                animals.add(animal);
+                i+=1;
+            }
+
         }
     }
     public int getRandomNumber(int min, int max) {
@@ -39,6 +50,8 @@ public class SimulationEngine implements IEngine,Runnable{
     }
     @Override
     public void run() {
+        int magicDays = 0;
+        int numOfAnimals = this.startAnimals;
         int i = 0;
         int j=0;
         while (i<moves.length){
@@ -73,6 +86,9 @@ public class SimulationEngine implements IEngine,Runnable{
                     animals.remove(a);
                     map.removeElement(a,a.getPosition());
                 }
+
+                numOfAnimals -= animalsToRemove.size();
+
                 //dodaje energie z roslinek
                 ArrayList<Grass> grassToRemove = new ArrayList<>();
                 for (Vector2d pos: map.getmapElements().keySet()){
@@ -98,16 +114,36 @@ public class SimulationEngine implements IEngine,Runnable{
                 for (Vector2d pos: map.getmapElements().keySet()){
                     if (map.getParents(pos) != null){
                         Animal[] parents = map.getParents(pos);
-                        Animal child = new Animal(map,pos,"c",parents[0],parents[1]);
-                        animalsToAdd.add(child);
+                        if (parents[0].getEnergy() >= 0.5*map.getStartEnergy() && parents[1].getEnergy() >= 0.5*map.getStartEnergy())
+                        {
+                            Animal child = new Animal(map,pos,"c",parents[0],parents[1],null);
+                            animalsToAdd.add(child);
+                        }
                     }
                 }
                 for (Animal animal: animalsToAdd) {
                     animals.add(animal);
                     map.place(animal);
-
                 }
-
+                numOfAnimals += animalsToAdd.size();
+                //jesli magiczna i jest 5 zwierzatek to dodaje je do mapy
+                if (magic && magicDays < 3 && numOfAnimals == 5)
+                {
+                    ArrayList<Animal> animalsToCopy = new ArrayList<>();
+                    for(Animal a:animals){
+                        int x = getRandomNumber(0,map.getWidth()+1);
+                        int y = getRandomNumber(0,map.getHeight()+1);
+                        Animal copy = new Animal(map,new Vector2d(x,y),"copy",null,null,a);
+                        animalsToCopy.add(copy);
+                    }
+                    for (Animal animal: animalsToCopy) {
+                        animals.add(animal);
+                        map.place(animal);
+                    }
+                    magicDays += 1;
+                    numOfAnimals += 5;
+                }
+                //dodaje trawke
                 map.addGrass(1);
                 map.addJungleGrass(1);
             }
