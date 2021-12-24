@@ -22,4 +22,5 @@ public abstract class AbstractWorldMapElement implements IMapElement{
         }
     }
 
+
 }

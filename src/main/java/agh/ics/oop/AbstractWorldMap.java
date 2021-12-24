@@ -46,7 +46,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         int jungleWidth = (int) Math.sqrt((jungleArea*(width+1))/(height+1));
         int jungleHeight = jungleArea/jungleWidth;
-        System.out.print(new Vector2d((int) (width+1)/2-jungleWidth/2,(int) (height+1)/2-jungleHeight/2).toString());
         return new Vector2d((int) (width+1)/2-jungleWidth/2,(int) (height+1)/2-jungleHeight/2);
     }
     public Vector2d jungleUpperRight(){
@@ -57,50 +56,76 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         int jungleHeight = jungleArea/jungleWidth;
         return new Vector2d((int) tmp.x+jungleWidth-1,(int) tmp.y+jungleHeight-1);
     }
+    private int howManyObInArea(Vector2d start,Vector2d end){
+        int res = 0;
+        for(int i = start.x;i<=end.x;i++){
+            for(int j = start.y;j<=end.y;j++){
+                if (mapElements.get(new Vector2d(i,j)) != null){
+                    res += 1;
+                }
+            }
+        }
+        return res;
+    }
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
     public void addGrass(int n){
-        Random rand = new Random();
-        rand.setSeed(42);
+        int area = (width+1)*(height+1);
+        int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         Vector2d lowerLeft = this.jungleLowerLeft();
         Vector2d upperRight = this.jungleUpperRight();
-        int i = 0;
-        while (i < n) {
-            int x = rand.nextInt((int) (width + 1));
-            int y = rand.nextInt((int) (height + 1));
-            if (!(this.isOccupied(new Vector2d(x, y))) && (x< lowerLeft.x || x>upperRight.x) && (y< lowerLeft.y || y>upperRight.y)) {
-                Grass tmp = new Grass(new Vector2d(x, y));
-                ArrayList<IMapElement> el = mapElements.get(new Vector2d(x, y));
-                if (el == null){
-                    el = new ArrayList<IMapElement>();
-                    mapElements.put(new Vector2d(x, y),el);
-                    el.add(tmp);
+        /*System.out.println(mapElements.size());
+        System.out.println(howManyObInArea(lowerLeft,upperRight));
+        System.out.println(area-jungleArea);*/
+        if(mapElements.size()-howManyObInArea(lowerLeft,upperRight) < area-jungleArea )
+        {
+            Random rand = new Random();
+            rand.setSeed(42);
+            int i = 0;
+            while (i < n) {
+                int x = rand.nextInt((int) (width + 1));
+                int y = rand.nextInt((int) (height + 1));
+                if (!(this.isOccupied(new Vector2d(x, y))) && !(x>= lowerLeft.x && x<=upperRight.x && y>= lowerLeft.y && y<=upperRight.y)) {
+                    Grass tmp = new Grass(new Vector2d(x, y));
+                    ArrayList<IMapElement> el = mapElements.get(new Vector2d(x, y));
+                    if (el == null){
+                        el = new ArrayList<IMapElement>();
+                        mapElements.put(new Vector2d(x, y),el);
+                        el.add(tmp);
+                    }
+                    i += 1;
                 }
-                i += 1;
             }
         }
+
     }
     public void addJungleGrass(int n){
-        Random rand = new Random();
-        rand.setSeed(42);
+        int area = (width+1)*(height+1);
+        int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         Vector2d lowerLeft = this.jungleLowerLeft();
         Vector2d upperRight = this.jungleUpperRight();
-        int i = 0;
-        while (i < n) {
-            int x = getRandomNumber(lowerLeft.x, upperRight.x+1);
-            int y = getRandomNumber(lowerLeft.y, upperRight.y+1);
-            if (!(this.isOccupied(new Vector2d(x, y)))) {
-                Grass tmp = new Grass(new Vector2d(x, y));
-                ArrayList<IMapElement> el = mapElements.get(new Vector2d(x, y));
-                if (el == null){
-                    el = new ArrayList<IMapElement>();
-                    mapElements.put(new Vector2d(x, y),el);
-                    el.add(tmp);
+        if(howManyObInArea(lowerLeft,upperRight) < jungleArea)
+        {
+            Random rand = new Random();
+            rand.setSeed(42);
+            int i = 0;
+            while (i < n) {
+                int x = getRandomNumber(lowerLeft.x, upperRight.x+1);
+                int y = getRandomNumber(lowerLeft.y, upperRight.y+1);
+                if (!(this.isOccupied(new Vector2d(x, y)))) {
+                    Grass tmp = new Grass(new Vector2d(x, y));
+                    ArrayList<IMapElement> el = mapElements.get(new Vector2d(x, y));
+                    if (el == null){
+                        el = new ArrayList<IMapElement>();
+                        mapElements.put(new Vector2d(x, y),el);
+                        el.add(tmp);
+                    }
+                    i += 1;
                 }
-                i += 1;
             }
         }
+
     }
     public boolean place(Animal animal) {
         ArrayList<IMapElement> el = mapElements.get(animal.getPosition());

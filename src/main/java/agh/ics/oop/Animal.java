@@ -46,6 +46,10 @@ public class Animal extends AbstractWorldMapElement{
         return this.orientation;
     }
 
+    public Integer[] getGenes(){
+        return this.genes;
+    }
+
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
@@ -255,5 +259,11 @@ public class Animal extends AbstractWorldMapElement{
         else{
             return "src/main/resources/energy5.jpg";
         }
+    }
+
+    public MoveDirection getMove(){
+        int number = getRandomNumber(0,31);
+        MoveDirection move = new OptionsParser().parse(this.genes[number]);
+        return move;
     }
 }

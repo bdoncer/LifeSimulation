@@ -1,21 +1,19 @@
 package agh.ics.oop;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class SimulationEngine implements IEngine,Runnable{
     private final int startAnimals;
-    private MoveDirection[] moves;
     private IWorldMap map;
     protected List<IEngineMoveObserver> observers = new ArrayList<>();
     int moveDelay;
     boolean magic;
+    boolean isPaused = false;
     ArrayList<Animal> animals = new ArrayList<Animal>();
     public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay,boolean isMagic){
         this.map = map;
         this.moveDelay = moveDelay;
-        this.moves = moves;
         this.magic = isMagic;
         this.startAnimals = startAnimals;
         int width = map.getWidth();
@@ -36,11 +34,21 @@ public class SimulationEngine implements IEngine,Runnable{
 
         }
     }
+
+    public void pauseThread(){
+        isPaused = true;
+    }
+    public void continueThread(){
+       synchronized (this){
+           notify();
+       }
+       isPaused = false;
+    }
+    public boolean getIsPaused(){
+        return isPaused;
+    }
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
-    }
-    public void movesSetter(MoveDirection[] moves){
-        this.moves = moves;
     }
     public void addObserver(IEngineMoveObserver observer){
         observers.add(observer);
@@ -48,29 +56,28 @@ public class SimulationEngine implements IEngine,Runnable{
     public void removeObserver(IEngineMoveObserver observer){
         observers.remove(observer);
     }
-    @Override
+
+
     public void run() {
         int magicDays = 0;
         int numOfAnimals = this.startAnimals;
-        int i = 0;
-        int j=0;
-        while (i<moves.length){
+        int days = 0;
+        int j = 0;
+        while (numOfAnimals>0){
             try {
+                synchronized (this){
+                    while(isPaused){
+                        wait();
+                    }
+                }
                 Thread.sleep(moveDelay);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (animals.size() > 0){
-                animals.get(j).move(moves[i]);
-            }
-
-
+            //poruszam zwierzatkiem
+            animals.get(j).move(animals.get(j).getMove());
             //zmniejszam mu energie, ktora zuzyl na ruch
-            if (animals.size() > 0){
-                animals.get(j).energy -= map.getMoveEnergy();
-            }
-
-            //
+            animals.get(j).energy -= map.getMoveEnergy();
             j+=1;
             if (j == animals.size()){
                 j = 0;
@@ -109,6 +116,7 @@ public class SimulationEngine implements IEngine,Runnable{
                     }
 
                 }
+
                 //rozmnazam zwierzatka
                 ArrayList<Animal> animalsToAdd = new ArrayList<>();
                 for (Vector2d pos: map.getmapElements().keySet()){
@@ -126,9 +134,9 @@ public class SimulationEngine implements IEngine,Runnable{
                     map.place(animal);
                 }
                 numOfAnimals += animalsToAdd.size();
+
                 //jesli magiczna i jest 5 zwierzatek to dodaje je do mapy
-                if (magic && magicDays < 3 && numOfAnimals == 5)
-                {
+                if (magic && magicDays < 3 && numOfAnimals == 5) {
                     ArrayList<Animal> animalsToCopy = new ArrayList<>();
                     for(Animal a:animals){
                         int x = getRandomNumber(0,map.getWidth()+1);
@@ -146,11 +154,14 @@ public class SimulationEngine implements IEngine,Runnable{
                 //dodaje trawke
                 map.addGrass(1);
                 map.addJungleGrass(1);
+                days+=1;
+
             }
             for(IEngineMoveObserver obs:observers){
                 obs.mapChanged();
             }
-            i+=1;
+
+
         }
     }
 }
