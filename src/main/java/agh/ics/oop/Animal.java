@@ -11,6 +11,8 @@ public class Animal extends AbstractWorldMapElement{
     private MapDirection orientation;
     private final IWorldMap map;
     float energy;
+    int lifeLength;
+    int numOfChildren;
     Integer[] genes = new Integer[32];
 
     public Animal(IWorldMap map,Vector2d initialPosition,String type,Animal parent1,Animal parent2,Animal toCopy){
@@ -22,6 +24,8 @@ public class Animal extends AbstractWorldMapElement{
                 MapDirection.S,MapDirection.SW,MapDirection.W,MapDirection.NW};
         int option = getRandomNumber(0,8);
         this.orientation = options[option];
+        this.lifeLength = 0;
+        this.numOfChildren = 0;
         //jesli zwierze jest startowe
         if (type.equals("s"))
         {

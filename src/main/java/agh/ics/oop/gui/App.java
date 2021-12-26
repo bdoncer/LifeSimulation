@@ -10,8 +10,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.awt.event.MouseEvent;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public class App extends Application implements IEngineMoveObserver {
@@ -20,6 +19,8 @@ public class App extends Application implements IEngineMoveObserver {
     SimulationEngine engine;
     WelcomeScreen welcomeScreen = new WelcomeScreen(this);
     VBox mainScreen = new VBox();
+
+
     /*public void init(){
         String[] args = getParameters().getRaw().toArray(new String[0]);
         try {
@@ -47,13 +48,23 @@ public class App extends Application implements IEngineMoveObserver {
             map.drawGridPane(grid); });
     }
 
+/*    private ScheduledExecutorService scheduledExecutorService;
+    int WINDOW_SIZE = 10;*/
     public void startSimulation(){
         map = new BendedMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
                 welcomeScreen.giveMoveEnergy(),welcomeScreen.givePlantEnergy());
-
-        engine = new SimulationEngine(map, welcomeScreen.giveStartAnimals(),500,welcomeScreen.giveIsMagic());
+        AllCharts allCharts = new AllCharts(map);
+        //proba dodania wykresu
+        allCharts.addChart("Days","Number of animals","hyhy");
+        allCharts.addChart("Days","Number of grass","hyhy");
+        allCharts.addChart("Days","Average energy","hyhy");
+        allCharts.addChart("Days","Average length of life","hyhy");
+        allCharts.addChart("Days","Average number of children","hyhy");
+        engine = new SimulationEngine(map, welcomeScreen.giveStartAnimals(),500,welcomeScreen.giveIsMagic(),allCharts);
         engine.addObserver(this);
+
         Thread engineThread = new Thread(engine);
+
         Button buttonStart = new Button("Start");
         buttonStart.setOnAction(e -> {
             engineThread.start();
@@ -71,7 +82,22 @@ public class App extends Application implements IEngineMoveObserver {
 
         });
 
-        VBox mapScreen = new VBox(new HBox(buttonStart,buttonPause), grid);
+
+        /*final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Platform.runLater(() -> {
+                Date now = new Date();
+                series.getData().add(new XYChart.Data<>(simpleDateFormat.format(now), engine.getNumOfAnimals()));
+
+                if (series.getData().size() > WINDOW_SIZE)
+                    series.getData().remove(0);
+            });
+        }, 0, 1, TimeUnit.SECONDS);*/
+        HBox charts = new HBox(allCharts.getLineCharts().get(0),allCharts.getLineCharts().get(1),
+                allCharts.getLineCharts().get(2),allCharts.getLineCharts().get(3),allCharts.getLineCharts().get(4));
+        VBox mapScreen = new VBox(new HBox(buttonStart,buttonPause),grid,charts);
+        //VBox mapScreen = new VBox(new HBox(buttonStart,buttonPause),allCharts.getLineCharts().get(0),allCharts.getLineCharts().get(1),grid);
         map.drawGridPane(grid);
         mainScreen.getChildren().clear();
         mainScreen.getChildren().add(mapScreen);

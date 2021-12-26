@@ -22,6 +22,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     protected int moveEnergy;
     protected int startEnergy;
     protected int plantEnergy;
+    private int numOfGrass=0;
 
     public int getWidth(){
         return this.width;
@@ -75,11 +76,9 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         Vector2d lowerLeft = this.jungleLowerLeft();
         Vector2d upperRight = this.jungleUpperRight();
-        /*System.out.println(mapElements.size());
-        System.out.println(howManyObInArea(lowerLeft,upperRight));
-        System.out.println(area-jungleArea);*/
         if(mapElements.size()-howManyObInArea(lowerLeft,upperRight) < area-jungleArea )
         {
+            numOfGrass += 1;
             Random rand = new Random();
             rand.setSeed(42);
             int i = 0;
@@ -107,6 +106,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         Vector2d upperRight = this.jungleUpperRight();
         if(howManyObInArea(lowerLeft,upperRight) < jungleArea)
         {
+            numOfGrass += 1;
             Random rand = new Random();
             rand.setSeed(42);
             int i = 0;
@@ -285,6 +285,9 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
 
     }
 
+    public int getNumOfGrass(){
+        return numOfGrass;
+    }
 
 
 

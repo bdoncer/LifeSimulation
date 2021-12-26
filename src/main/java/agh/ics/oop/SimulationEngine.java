@@ -1,6 +1,10 @@
 package agh.ics.oop;
 
+import javafx.application.Platform;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class SimulationEngine implements IEngine,Runnable{
@@ -10,15 +14,18 @@ public class SimulationEngine implements IEngine,Runnable{
     int moveDelay;
     boolean magic;
     boolean isPaused = false;
+    int numOfAnimals;
+    AllCharts allCharts;
     ArrayList<Animal> animals = new ArrayList<Animal>();
-    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay,boolean isMagic){
+    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay,boolean isMagic,AllCharts allCharts){
         this.map = map;
         this.moveDelay = moveDelay;
         this.magic = isMagic;
         this.startAnimals = startAnimals;
+        this.allCharts = allCharts;
         int width = map.getWidth();
         int height = map.getHeight();
-
+        numOfAnimals = this.startAnimals;
         //umieszczam poczatkowe zwierzeta
         int i = 0;
         while(i<startAnimals){
@@ -31,7 +38,6 @@ public class SimulationEngine implements IEngine,Runnable{
                 animals.add(animal);
                 i+=1;
             }
-
         }
     }
 
@@ -47,6 +53,9 @@ public class SimulationEngine implements IEngine,Runnable{
     public boolean getIsPaused(){
         return isPaused;
     }
+    public int getNumOfAnimals(){
+        return this.numOfAnimals;
+    }
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
@@ -60,9 +69,10 @@ public class SimulationEngine implements IEngine,Runnable{
 
     public void run() {
         int magicDays = 0;
-        int numOfAnimals = this.startAnimals;
-        int days = 0;
+        Integer days = 0;
         int j = 0;
+        int numOfDeadAnimals = 0;
+        int lifeLengthOfDeadAnimals = 0;
         while (numOfAnimals>0){
             try {
                 synchronized (this){
@@ -87,14 +97,20 @@ public class SimulationEngine implements IEngine,Runnable{
                 {
                     if(a.energy <= 0){
                         animalsToRemove.add(a);
+                        numOfDeadAnimals += 1;
+                        lifeLengthOfDeadAnimals += a.lifeLength;
                     }
                 }
                 for (Animal a: animalsToRemove) {
                     animals.remove(a);
                     map.removeElement(a,a.getPosition());
                 }
-
                 numOfAnimals -= animalsToRemove.size();
+
+                //dodaje dzien do dlugosci zycia tych, ktore przezyly
+                for(Animal a:animals) {
+                    a.lifeLength += 1;
+                }
 
                 //dodaje energie z roslinek
                 ArrayList<Grass> grassToRemove = new ArrayList<>();
@@ -124,6 +140,8 @@ public class SimulationEngine implements IEngine,Runnable{
                         Animal[] parents = map.getParents(pos);
                         if (parents[0].getEnergy() >= 0.5*map.getStartEnergy() && parents[1].getEnergy() >= 0.5*map.getStartEnergy())
                         {
+                            parents[0].numOfChildren += 1;
+                            parents[1].numOfChildren += 1;
                             Animal child = new Animal(map,pos,"c",parents[0],parents[1],null);
                             animalsToAdd.add(child);
                         }
@@ -155,7 +173,47 @@ public class SimulationEngine implements IEngine,Runnable{
                 map.addGrass(1);
                 map.addJungleGrass(1);
                 days+=1;
-
+                //obliczam sredni poziom energii
+                int allEnergy = 0;
+                for(Animal a:animals) {
+                    allEnergy += a.energy;
+                }
+                //obliczam srednia ilosc dzieci
+                int allChildren = 0;
+                for(Animal a:animals) {
+                    allChildren += a.numOfChildren;
+                }
+                //aktualizuje wykresy
+                Integer finalDays = days;
+                Platform.runLater(() -> {
+                    allCharts.getCharts().get(0).addData(finalDays.toString(),numOfAnimals);
+                });
+                Integer finalDays1 = days;
+                Platform.runLater(() -> {
+                    allCharts.getCharts().get(1).addData(finalDays1.toString(),map.getNumOfGrass());
+                });
+                int finalAllEnergy = allEnergy;
+                Integer finalDays2 = days;
+                Platform.runLater(() -> {
+                    allCharts.getCharts().get(2).addData(finalDays2.toString(),(float) finalAllEnergy /numOfAnimals);
+                });
+                int finalNumOfDeadAnimals = numOfDeadAnimals;
+                int finalLifeLengthOfDeadAnimals = lifeLengthOfDeadAnimals;
+                Integer finalDays3 = days;
+                Integer finalDays4 = days;
+                Platform.runLater(() -> {
+                    if (finalNumOfDeadAnimals != 0){
+                        allCharts.getCharts().get(3).addData(finalDays3.toString(),(float) finalLifeLengthOfDeadAnimals / finalNumOfDeadAnimals);
+                    }
+                    else{
+                        allCharts.getCharts().get(3).addData(finalDays4.toString(),0.0);
+                    }
+                });
+                int finalAllChildren = allChildren;
+                Integer finalDays5 = days;
+                Platform.runLater(() -> {
+                    allCharts.getCharts().get(4).addData(finalDays5.toString(),(float) finalAllChildren /numOfAnimals);
+                });
             }
             for(IEngineMoveObserver obs:observers){
                 obs.mapChanged();
@@ -164,4 +222,5 @@ public class SimulationEngine implements IEngine,Runnable{
 
         }
     }
+
 }

@@ -73,4 +73,6 @@ public interface IWorldMap {
     Animal[] getParents(Vector2d pos);
 
     void addElement(IMapElement element, Vector2d position);
+
+    int getNumOfGrass();
 }
