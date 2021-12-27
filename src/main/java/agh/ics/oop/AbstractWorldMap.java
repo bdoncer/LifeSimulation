@@ -1,21 +1,34 @@
 package agh.ics.oop;
 
-import agh.ics.oop.gui.GuiElementBox;
+import agh.ics.oop.gui.AllImages;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
     private final MapVisualizer visualizer = new MapVisualizer(this);
     HashMap<Vector2d, ArrayList<IMapElement>> mapElements = new HashMap<>();
+    AllImages allImages;
+    {
+        try {
+            allImages = new AllImages();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
     protected int width;
     protected int height;
     protected double jungleRatio;
@@ -73,10 +86,10 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     }
     public void addGrass(int n){
         int area = (width+1)*(height+1);
-        int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         Vector2d lowerLeft = this.jungleLowerLeft();
         Vector2d upperRight = this.jungleUpperRight();
-        if(mapElements.size()-howManyObInArea(lowerLeft,upperRight) < area-jungleArea )
+        int jungleRealArea = (upperRight.x-lowerLeft.x+1)*(upperRight.y-lowerLeft.y+1);
+        if(mapElements.size()-howManyObInArea(lowerLeft,upperRight) < area-jungleRealArea )
         {
             numOfGrass += 1;
             Random rand = new Random();
@@ -101,10 +114,10 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
     }
     public void addJungleGrass(int n){
         int area = (width+1)*(height+1);
-        int jungleArea = (int) ((jungleRatio*area)/(1+jungleRatio));
         Vector2d lowerLeft = this.jungleLowerLeft();
         Vector2d upperRight = this.jungleUpperRight();
-        if(howManyObInArea(lowerLeft,upperRight) < jungleArea)
+        int jungleRealArea = (upperRight.x-lowerLeft.x+1)*(upperRight.y-lowerLeft.y+1);
+        if(howManyObInArea(lowerLeft,upperRight) < jungleRealArea)
         {
             numOfGrass += 1;
             Random rand = new Random();
@@ -251,28 +264,37 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         for (ArrayList<IMapElement> el: mapElements.values()){
             for (IMapElement ob: el){
                 VBox b;
-                GuiElementBox g;
                 if (ob instanceof Grass)
                 {
-                    g = new GuiElementBox(ob,1);
-                    b = g.getVBox();
+                    Image image = allImages.grass;
+                    ImageView pic = new ImageView();
+                    pic.setFitWidth(20);
+                    pic.setFitHeight(20);
+                    pic.setImage(image);
+                    b = new VBox(pic);
+                    b.setAlignment(Pos.CENTER);
                     grid.add(b,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
                     b.setAlignment(Pos.CENTER);
                 }
                 else{
-                    g = new GuiElementBox( ob,1);
-                    GuiElementBox g2 = new GuiElementBox(ob, 2);
-                    VBox b1 = g.getVBox();
-                    VBox b2 = g2.getVBox();
-                    VBox a = new VBox(b1,b2);
-                    a.setAlignment(Pos.CENTER);
-                    grid.add(a,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
-                    a.setAlignment(Pos.CENTER);
+                    Image image = allImages.dog[ob.getIndex()];
+                    ImageView pic = new ImageView();
+                    pic.setFitWidth(20);
+                    pic.setFitHeight(20);
+                    pic.setImage(image);
+                    Image image2 = allImages.energy[ob.getEnergyIndex()];
+                    ImageView pic2 = new ImageView();
+                    pic2.setFitWidth(20);
+                    pic2.setFitHeight(20);
+                    pic2.setImage(image2);
+                    b = new VBox(pic,pic2);
+                    b.setAlignment(Pos.CENTER);
+                    grid.add(b,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
+                    b.setAlignment(Pos.CENTER);
                 }
 
             }
         }
-
         grid.getRowConstraints().clear();
         grid.getColumnConstraints().clear();
         for (int i = 0; i < height+2; i++) {
@@ -282,9 +304,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         for (int i = 0; i < width+2; i++) {
             grid.getColumnConstraints().add(new ColumnConstraints(50));
         }
-
     }
-
     public int getNumOfGrass(){
         return numOfGrass;
     }

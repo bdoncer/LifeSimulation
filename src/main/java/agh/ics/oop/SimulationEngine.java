@@ -1,15 +1,21 @@
 package agh.ics.oop;
 
+import agh.ics.oop.gui.AllCharts;
+import agh.ics.oop.gui.MagicInformation;
 import javafx.application.Platform;
-
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class SimulationEngine implements IEngine,Runnable{
     private final int startAnimals;
-    private IWorldMap map;
+    private AbstractWorldMap map;
     protected List<IEngineMoveObserver> observers = new ArrayList<>();
     int moveDelay;
     boolean magic;
@@ -17,12 +23,14 @@ public class SimulationEngine implements IEngine,Runnable{
     int numOfAnimals;
     AllCharts allCharts;
     ArrayList<Animal> animals = new ArrayList<Animal>();
-    public SimulationEngine(IWorldMap map,int startAnimals,int moveDelay,boolean isMagic,AllCharts allCharts){
+    MagicInformation magInf;
+    public SimulationEngine(AbstractWorldMap map, int startAnimals, int moveDelay, boolean isMagic, AllCharts allCharts, MagicInformation magic){
         this.map = map;
         this.moveDelay = moveDelay;
         this.magic = isMagic;
         this.startAnimals = startAnimals;
         this.allCharts = allCharts;
+        this.magInf = magic;
         int width = map.getWidth();
         int height = map.getHeight();
         numOfAnimals = this.startAnimals;
@@ -90,6 +98,9 @@ public class SimulationEngine implements IEngine,Runnable{
             animals.get(j).energy -= map.getMoveEnergy();
             j+=1;
             if (j == animals.size()){
+                Platform.runLater(() -> {
+                    magInf.takeAwayMagic();
+                });
                 j = 0;
                 ArrayList<Animal> animalsToRemove = new ArrayList<>();
                 //usuwam martwe zwierzeta
@@ -155,6 +166,9 @@ public class SimulationEngine implements IEngine,Runnable{
 
                 //jesli magiczna i jest 5 zwierzatek to dodaje je do mapy
                 if (magic && magicDays < 3 && numOfAnimals == 5) {
+                    Platform.runLater(() -> {
+                        magInf.giveMagic();
+                    });
                     ArrayList<Animal> animalsToCopy = new ArrayList<>();
                     for(Animal a:animals){
                         int x = getRandomNumber(0,map.getWidth()+1);
@@ -168,6 +182,7 @@ public class SimulationEngine implements IEngine,Runnable{
                     }
                     magicDays += 1;
                     numOfAnimals += 5;
+
                 }
                 //dodaje trawke
                 map.addGrass(1);
@@ -216,11 +231,8 @@ public class SimulationEngine implements IEngine,Runnable{
                 });
             }
             for(IEngineMoveObserver obs:observers){
-                obs.mapChanged();
+                obs.mapChanged(map);
             }
-
-
         }
     }
-
 }

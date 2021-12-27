@@ -7,11 +7,11 @@ public class Grass extends AbstractWorldMapElement {
     public String toString(){
         return "*";
     }
-    public String getUrl(){
-        return "src/main/resources/grass.jpg";
+    public int getIndex(){
+        return 0;
     }
-    public String getEnergyUrl(){
-        return " ";
+    public int getEnergyIndex(){
+        return 0;
     }
     public float getEnergy(){
         return 0;

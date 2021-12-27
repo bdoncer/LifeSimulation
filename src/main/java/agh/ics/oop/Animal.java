@@ -224,44 +224,44 @@ public class Animal extends AbstractWorldMapElement{
                 break;
         }
     }
-    public String getUrl(){
+    public int getIndex(){
         switch(this.orientation){
             case N:
-                return "src/main/resources/1.jpg";
+                return 0;
             case NE:
-                return "src/main/resources/2.jpg";
+                return 1;
             case E:
-                return "src/main/resources/3.jpg";
+                return 2;
             case SE:
-                return "src/main/resources/4.jpg";
+                return 3;
             case S:
-                return "src/main/resources/5.jpg";
+                return 4;
             case SW:
-                return "src/main/resources/6.jpg";
+                return 5;
             case W:
-                return "src/main/resources/7.jpg";
+                return 6;
             case NW:
-                return "src/main/resources/8.jpg";
+                return 7;
         }
-        return null;
+        return 0;
     }
 
-    public String getEnergyUrl(){
+    public int getEnergyIndex(){
         int maxEnergy =  this.map.getStartEnergy();
         if (this.energy <= 0.2*maxEnergy){
-            return "src/main/resources/energy1.jpg";
+            return 0;
         }
         else if (this.energy <= 0.4*maxEnergy){
-            return "src/main/resources/energy2.jpg";
+            return 1;
         }
         else if (this.energy <= 0.6*maxEnergy){
-            return "src/main/resources/energy3.jpg";
+            return 2;
         }
         else if (this.energy <= 0.8*maxEnergy){
-            return "src/main/resources/energy4.jpg";
+            return 3;
         }
         else{
-            return "src/main/resources/energy5.jpg";
+            return 4;
         }
     }
 

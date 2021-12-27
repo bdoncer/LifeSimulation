@@ -1,5 +1,7 @@
-package agh.ics.oop;
+package agh.ics.oop.gui;
 
+import agh.ics.oop.IWorldMap;
+import agh.ics.oop.gui.Chart;
 import javafx.scene.chart.LineChart;
 
 import java.util.ArrayList;
@@ -10,8 +12,8 @@ public class AllCharts {
     public AllCharts(IWorldMap map){
         this.map = map;
     }
-    public void addChart(String xLabel, String yLabel, String title){
-        charts.add(new Chart(xLabel,yLabel,title));
+    public void addChart(String xLabel, String yLabel){
+        charts.add(new Chart(xLabel,yLabel));
     }
     public ArrayList<LineChart> getLineCharts(){
         ArrayList<LineChart> lineCharts = new ArrayList<>();
