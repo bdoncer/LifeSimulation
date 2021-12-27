@@ -1,8 +1,5 @@
 package agh.ics.oop.gui;
-
 import javafx.scene.chart.*;
-
-import java.awt.datatransfer.Clipboard;
 
 public class Chart {
     final CategoryAxis xAxis = new CategoryAxis();
@@ -16,7 +13,12 @@ public class Chart {
         yAxis.setAnimated(false);
         chart.setAnimated(false);
         chart.getData().add(series);
-
+        chart.setPrefHeight(200);
+        chart.setPrefWidth(200);
+        chart.setMinHeight(1);
+        chart.setMinWidth(1);
+        chart.setLegendVisible(false);
+        chart.setStyle("-fx-font-size: " + 10 + "px;");
     }
     public void addData(String x,Number y){
         series.getData().add(new XYChart.Data<>(x,y));

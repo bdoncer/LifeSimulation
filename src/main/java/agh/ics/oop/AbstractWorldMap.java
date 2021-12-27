@@ -226,8 +226,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         return parents;
     }
 
-
-
     //zwraca trawę na danej pozycji (lub null, jeśli się nie da)
     public IMapElement isGrass(Vector2d position){
         ArrayList<IMapElement> el= mapElements.get(position);
@@ -244,6 +242,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         Vector2d upperRight = new Vector2d(width,height);
         int width = upperRight.x - lowerLeft.x;
         int height = upperRight.y - lowerLeft.y;
+        int dimension = Math.max(width,height);
         grid.setGridLinesVisible(true);
         Label start = new Label("y/x");
         grid.add(start, 0, 0, 1, 1);
@@ -268,8 +267,8 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
                 {
                     Image image = allImages.grass;
                     ImageView pic = new ImageView();
-                    pic.setFitWidth(20);
-                    pic.setFitHeight(20);
+                    pic.setFitWidth(400/(dimension));
+                    pic.setFitHeight(400/(dimension));
                     pic.setImage(image);
                     b = new VBox(pic);
                     b.setAlignment(Pos.CENTER);
@@ -279,13 +278,13 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
                 else{
                     Image image = allImages.dog[ob.getIndex()];
                     ImageView pic = new ImageView();
-                    pic.setFitWidth(20);
-                    pic.setFitHeight(20);
+                    pic.setFitWidth(400/(2*(dimension+2)));
+                    pic.setFitHeight(400/(2*(dimension+2)));
                     pic.setImage(image);
                     Image image2 = allImages.energy[ob.getEnergyIndex()];
                     ImageView pic2 = new ImageView();
-                    pic2.setFitWidth(20);
-                    pic2.setFitHeight(20);
+                    pic2.setFitWidth(400/(dimension));
+                    pic2.setFitHeight(400/(2*(dimension+2)));
                     pic2.setImage(image2);
                     b = new VBox(pic,pic2);
                     b.setAlignment(Pos.CENTER);
@@ -298,11 +297,11 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         grid.getRowConstraints().clear();
         grid.getColumnConstraints().clear();
         for (int i = 0; i < height+2; i++) {
-            grid.getRowConstraints().add(new RowConstraints(50));
+            grid.getRowConstraints().add(new RowConstraints(400/dimension));
 
         }
         for (int i = 0; i < width+2; i++) {
-            grid.getColumnConstraints().add(new ColumnConstraints(50));
+            grid.getColumnConstraints().add(new ColumnConstraints(400/dimension));
         }
     }
     public int getNumOfGrass(){

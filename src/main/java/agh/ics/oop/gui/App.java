@@ -68,16 +68,16 @@ public class App extends Application implements IEngineMoveObserver {
         //wykresy
         AllCharts allCharts1 = new AllCharts(map1);
         AllCharts allCharts2 = new AllCharts(map2);
-        allCharts1.addChart("Days","Number of animals");
-        allCharts1.addChart("Days","Number of grass");
-        allCharts1.addChart("Days","Average energy");
-        allCharts1.addChart("Days","Average length of life");
-        allCharts1.addChart("Days","Average number of children");
-        allCharts2.addChart("Days","Number of animals");
-        allCharts2.addChart("Days","Number of grass");
-        allCharts2.addChart("Days","Average energy");
-        allCharts2.addChart("Days","Average length of life");
-        allCharts2.addChart("Days","Average number of children");
+        allCharts1.addChart("Days","Nr of animals");
+        allCharts1.addChart("Days","Nr of grass");
+        allCharts1.addChart("Days","Avg energy");
+        allCharts1.addChart("Days","Avg length of life");
+        allCharts1.addChart("Days","Avg nr of children");
+        allCharts2.addChart("Days","Nr of animals");
+        allCharts2.addChart("Days","Nr of grass");
+        allCharts2.addChart("Days","Avg energy");
+        allCharts2.addChart("Days","Avg length of life");
+        allCharts2.addChart("Days","Avg number of children");
         //magia
         MagicInformation magic1 = new MagicInformation();
         MagicInformation magic2 = new MagicInformation();
@@ -128,9 +128,12 @@ public class App extends Application implements IEngineMoveObserver {
         HBox charts2Part1 = new HBox(allCharts2.getLineCharts().get(0),allCharts2.getLineCharts().get(1),
                 allCharts2.getLineCharts().get(2));
         HBox charts2Part2 = new HBox(allCharts2.getLineCharts().get(3),allCharts2.getLineCharts().get(4));
-
-        VBox rMap = new VBox(new Label("Rectangular Map"),new HBox(buttonStart1,buttonPause1,magic1.getLabel()),grid1,charts1Part1,charts1Part2);
-        VBox bMap = new VBox(new Label("Bended Map"),new HBox(buttonStart2,buttonPause2,magic2.getLabel()),grid2,charts2Part1,charts2Part2);
+        charts1Part1.setAlignment(Pos.CENTER);
+        charts1Part2.setAlignment(Pos.CENTER);
+        charts2Part1.setAlignment(Pos.CENTER);
+        charts2Part1.setAlignment(Pos.CENTER);
+        VBox rMap = new VBox(new Label("Bended Map"),new HBox(buttonStart1,buttonPause1,magic1.getLabel()),grid1,charts1Part1,charts1Part2);
+        VBox bMap = new VBox(new Label("Rectangular Map"),new HBox(buttonStart2,buttonPause2,magic2.getLabel()),grid2,charts2Part1,charts2Part2);
         HBox mapScreen = new HBox(rMap,bMap);
         map1.drawGridPane(grid1);
         map2.drawGridPane(grid2);
@@ -138,6 +141,4 @@ public class App extends Application implements IEngineMoveObserver {
         mainScreen.getChildren().add(mapScreen);
 
     }
-
-
 }

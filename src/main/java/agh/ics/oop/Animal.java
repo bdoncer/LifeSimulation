@@ -193,10 +193,8 @@ public class Animal extends AbstractWorldMapElement{
                 go2 = go2.opposite();
                 if (this.map instanceof RectangularMap) {
                     if (map.canMoveTo(this.position.add(go2))) {
-                        Vector2d oldPosition = this.position;
-                        this.positionChanged(oldPosition);
+                        this.positionChanged(this.position.add(go2));
                         this.position = this.position.add(go2);
-
                     }
                 }
                 if (this.map instanceof BendedMap){
