@@ -9,7 +9,9 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -29,6 +31,7 @@ public class App extends Application implements IEngineMoveObserver {
     VBox mainScreen = new VBox();
 
     @Override
+    //tworzy scene
     public void start(Stage primaryStage) throws Exception {
         primaryStage.setTitle("Pieski");
         mainScreen.setAlignment(Pos.CENTER);
@@ -64,10 +67,19 @@ public class App extends Application implements IEngineMoveObserver {
 
     public void startSimulation(){
         //mapy
-        map1 = new BendedMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
-                welcomeScreen.giveMoveEnergy(),welcomeScreen.givePlantEnergy());
-        map2 = new RectangularMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
-                welcomeScreen.giveMoveEnergy(),welcomeScreen.givePlantEnergy());
+        try {
+            map1 = new BendedMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
+                    welcomeScreen.giveMoveEnergy(), welcomeScreen.givePlantEnergy());
+            map2 = new RectangularMap(welcomeScreen.giveWidth(), welcomeScreen.giveHeight(), welcomeScreen.giveJungleRatio(), welcomeScreen.giveStartEnergy(),
+                    welcomeScreen.giveMoveEnergy(), welcomeScreen.givePlantEnergy());
+        }
+        catch(IllegalArgumentException ex){
+            Alert alert = new Alert(Alert.AlertType.ERROR,"Would you like to try again?", ButtonType.YES);
+            alert.setHeaderText(ex.getMessage());
+            alert.setContentText("Would you like to try again?");
+            alert.showAndWait();
+            System.exit(1);
+        }
         //wykresy
         AllCharts allCharts1 = new AllCharts(map1);
         AllCharts allCharts2 = new AllCharts(map2);
@@ -88,12 +100,22 @@ public class App extends Application implements IEngineMoveObserver {
         Label domGen1 = new Label();
         Label domGen2 = new Label();
         //silnik i watek
-        engine1 = new SimulationEngine(map1, welcomeScreen.giveStartAnimals(),10,welcomeScreen.giveIsMagic(),allCharts1,magic1,domGen1);
+        try{
+            engine1 = new SimulationEngine(map1, welcomeScreen.giveStartAnimals(),10,welcomeScreen.giveIsMagic1(),allCharts1,magic1,domGen1);
+            engine2 = new SimulationEngine(map2, welcomeScreen.giveStartAnimals(),10,welcomeScreen.giveIsMagic2(),allCharts2,magic2,domGen2);
+        }
+        catch(IllegalArgumentException ex){
+            Alert alert = new Alert(Alert.AlertType.ERROR,"Would you like to try again?", ButtonType.YES);
+            alert.setHeaderText(ex.getMessage());
+            alert.setContentText("Would you like to try again?");
+            alert.showAndWait();
+            System.exit(1);
+        }
         engine1.addObserver(this);
         Thread engineThread1 = new Thread(engine1);
-        engine2 = new SimulationEngine(map2, welcomeScreen.giveStartAnimals(),10,welcomeScreen.giveIsMagic(),allCharts2,magic2,domGen2);
         engine2.addObserver(this);
         Thread engineThread2 = new Thread(engine2);
+
         //guziki
         Button buttonCsv1 = new Button("Don't touch");
         Button buttonCsv2 = new Button("Don't touch");
@@ -153,7 +175,6 @@ public class App extends Application implements IEngineMoveObserver {
                 buttonCsv2.setText("Don't touch");
                 light2.setText("Don't touch");
             }
-
         });
         //ustalam ulozenie
         HBox charts1Part1 = new HBox(allCharts1.getLineCharts().get(0),allCharts1.getLineCharts().get(1),

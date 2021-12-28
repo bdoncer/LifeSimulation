@@ -8,14 +8,15 @@ import javafx.scene.layout.VBox;
 //klasa do uzyskiwania parametrow wejsciowych, ktore wpisuje uzytkownik
 public class WelcomeScreen {
     VBox welcomeScreen = new VBox();
-    TextArea widthText = new TextArea("8");
-    TextArea heightText = new TextArea("8");
+    TextArea widthText = new TextArea("10");
+    TextArea heightText = new TextArea("10");
     TextArea jungleRatioText = new TextArea("0.2");
-    TextArea startEnergyText = new TextArea("10");
+    TextArea startEnergyText = new TextArea("20");
     TextArea moveEnergyText = new TextArea("1");
-    TextArea plantEnergyText = new TextArea("2");
-    TextArea startAnimalsText = new TextArea("10");
-    TextArea isMagicText = new TextArea("False");
+    TextArea plantEnergyText = new TextArea("10");
+    TextArea startAnimalsText = new TextArea("25");
+    TextArea isMagic1Text = new TextArea("False");
+    TextArea isMagic2Text = new TextArea("False");
     public WelcomeScreen(App app){
         Button startButton = new Button("Rozpocznij symulacje :))");
         startButton.setOnAction(event -> {
@@ -40,9 +41,10 @@ public class WelcomeScreen {
                 plantEnergyText,
                 new Label("start animals"),
                 startAnimalsText,
-                new Label("turn on magical mode? (True/False)"),
-                isMagicText
-
+                new Label("turn on magical mode for Bended Map? (True/False)"),
+                isMagic1Text,
+                new Label("turn on magical mode for Rectangular Map? (True/False)"),
+                isMagic2Text
         );
         welcomeScreen.getChildren().add(startButton);
         welcomeScreen.setAlignment(Pos.CENTER);
@@ -53,35 +55,70 @@ public class WelcomeScreen {
     }
 
     public int giveWidth(){
-        return Integer.parseInt(widthText.getText());
+        int width = Integer.parseInt(widthText.getText());
+        if(width < 0){
+            throw new IllegalArgumentException("Width can't be negative");
+        }
+        return width ;
     }
 
     public int giveHeight(){
-        return Integer.parseInt(heightText.getText());
+        int height = Integer.parseInt(heightText.getText());
+        if(height < 0){
+            throw new IllegalArgumentException("Height can't be negative");
+        }
+        return height ;
     }
 
     public float giveJungleRatio(){
-        return Float.parseFloat(jungleRatioText.getText());
+        float jR = Float.parseFloat(jungleRatioText.getText());
+        if(jR < 0){
+            throw new IllegalArgumentException("Jungle Ratio can't be negative");
+        }
+        return jR;
     }
 
     public int giveStartEnergy(){
-        return Integer.parseInt(startEnergyText.getText());
+        int startEnergy = Integer.parseInt(startEnergyText.getText());
+        if(startEnergy < 0){
+            throw new IllegalArgumentException("Start Energy can't be negative");
+        }
+        return startEnergy;
     }
 
     public int giveMoveEnergy(){
-        return Integer.parseInt(moveEnergyText.getText());
+        int moveEnergy = Integer.parseInt(moveEnergyText.getText());
+        if(moveEnergy < 0){
+            throw new IllegalArgumentException("Move Energy can't be negative");
+        }
+        return moveEnergy;
     }
 
     public int givePlantEnergy(){
-        return Integer.parseInt(plantEnergyText.getText());
+        int plantEnergy = Integer.parseInt(plantEnergyText.getText());
+        if(plantEnergy < 0){
+            throw new IllegalArgumentException("Plant Energy can't be negative");
+        }
+        return plantEnergy;
     }
 
     public int giveStartAnimals(){
-        return Integer.parseInt(startAnimalsText.getText());
+        int startAnimals = Integer.parseInt(startAnimalsText.getText());
+        if(startAnimals < 0){
+            throw new IllegalArgumentException("Number of Start Animals can't be negative");
+        }
+        if(startAnimals > giveHeight()*giveWidth()){
+            throw new IllegalArgumentException("Too many animals");
+        }
+        return startAnimals;
     }
 
-    public boolean giveIsMagic(){
-        return Boolean.parseBoolean(isMagicText.getText());
+    public boolean giveIsMagic1(){
+        return Boolean.parseBoolean(isMagic1Text.getText());
+    }
+
+    public boolean giveIsMagic2(){
+        return Boolean.parseBoolean(isMagic2Text.getText());
     }
 
 }

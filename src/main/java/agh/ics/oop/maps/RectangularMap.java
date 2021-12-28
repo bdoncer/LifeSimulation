@@ -4,7 +4,7 @@ package agh.ics.oop.maps;
 
 import agh.ics.oop.data.Vector2d;
 import agh.ics.oop.interfaces.IWorldMap;
-
+//mapa ze sztywnymi koncami
 public class RectangularMap extends AbstractWorldMap implements IWorldMap {
     public RectangularMap(int width,int height, double jungleRatio,int startEnergy,int moveEnergy,int plantEnergy){
         this.width = width;

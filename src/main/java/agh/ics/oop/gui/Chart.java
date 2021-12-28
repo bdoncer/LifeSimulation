@@ -22,6 +22,7 @@ public class Chart {
     }
     public void addData(String x,Number y){
         series.getData().add(new XYChart.Data<>(x,y));
+        //na wykresie pokazuja sie dane tylko z 5 ostatnich dni
         if (series.getData().size() > 5)
             series.getData().remove(0);
     }

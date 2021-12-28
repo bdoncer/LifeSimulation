@@ -6,6 +6,8 @@ public class Grass extends AbstractWorldMapElement {
     public Grass(Vector2d position){
         this.position = position;
     }
+
+    //niepotrzebne funkcje
     public String toString(){
         return "*";
     }
@@ -15,12 +17,10 @@ public class Grass extends AbstractWorldMapElement {
     public int getEnergyIndex(){
         return 0;
     }
-
     @Override
     public Object getStringGenes() {
         return null;
     }
-
     public float getEnergy(){
         return 0;
     }

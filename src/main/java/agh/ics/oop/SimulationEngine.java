@@ -34,6 +34,10 @@ public class SimulationEngine implements IEngine,Runnable{
     boolean toCsv = false;
     String dominantGenotype;
     Label forGenes;
+    int magicDays = 0;
+    Integer days = 0;
+    int numOfDeadAnimals = 0;
+    int lifeLengthOfDeadAnimals = 0;
 
     public SimulationEngine(AbstractWorldMap map, int startAnimals, int moveDelay, boolean isMagic, AllCharts allCharts, MagicInformation magic,Label forGenes){
         this.map = map;
@@ -84,9 +88,6 @@ public class SimulationEngine implements IEngine,Runnable{
     public boolean getIsPaused(){
         return isPaused;
     }
-    public int getNumOfAnimals(){
-        return this.numOfAnimals;
-    }
     public int getRandomNumber(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
@@ -97,7 +98,7 @@ public class SimulationEngine implements IEngine,Runnable{
         observers.remove(observer);
     }
 
-
+    //wywoluje zapisanie do csv o odpowiedniej nazwie
     private void writeToCsv(int day,ArrayList<String[]> toFile){
         CvsFile cvs = null;
         if (map instanceof RectangularMap)
@@ -129,12 +130,107 @@ public class SimulationEngine implements IEngine,Runnable{
         return dominantGenotype;
     }
 
+    private void removeDeadAnimals(){
+        ArrayList<Animal> animalsToRemove = new ArrayList<>();
+        for(Animal a:animals)
+        {
+            if(a.energy <= 0){
+                animalsToRemove.add(a);
+                if(genes.get(a.getStringGenes())-1 == 0){
+                    genes.remove(a.getStringGenes());
+                }
+                else{
+                    genes.put(a.getStringGenes(),genes.get(a.getStringGenes())-1);
+                }
+                numOfDeadAnimals += 1;
+                lifeLengthOfDeadAnimals += a.lifeLength;
+            }
+        }
+        for (Animal a: animalsToRemove) {
+            animals.remove(a);
+            map.removeElement(a,a.getPosition());
+        }
+        numOfAnimals -= animalsToRemove.size();
+    }
+
+    private void addGrassEnergy(){
+        ArrayList<Grass> grassToRemove = new ArrayList<>();
+        for (Vector2d pos: map.getmapElements().keySet()){
+            if (map.isGrass(pos) != null){
+                ArrayList<Animal> strongest = map.getBest(pos);
+                if(strongest != null){
+                    for (Animal a:strongest){
+                        a.addEnergy(map.getPlantEnergy()/strongest.size());
+                    }
+                    if (strongest.size() != 0){
+                        grassToRemove.add((Grass) map.isGrass(pos));
+                    }
+                }
+
+
+            }
+        }
+        if (grassToRemove.size() != 0){
+            for(Grass g:grassToRemove){
+                map.removeElement(g,g.getPosition());
+            }
+
+        }
+    }
+    private void reproduceAnimals(){
+        ArrayList<Animal> animalsToAdd = new ArrayList<>();
+        for (Vector2d pos: map.getmapElements().keySet()){
+            if (map.getParents(pos) != null){
+                Animal[] parents = map.getParents(pos);
+                if (parents[0].getEnergy() >= 0.5*map.getStartEnergy() && parents[1].getEnergy() >= 0.5*map.getStartEnergy())
+                {
+                    parents[0].numOfChildren += 1;
+                    parents[1].numOfChildren += 1;
+                    Animal child = new Animal(map,pos,"c",parents[0],parents[1],null);
+                    animalsToAdd.add(child);
+                    if (genes.get(child.getStringGenes()) != null){
+                        genes.put(child.getStringGenes(),genes.get(child.getStringGenes())+1);
+                    }
+                    else{
+                        genes.put(child.getStringGenes(), 1);
+                    }
+                }
+            }
+        }
+        for (Animal animal: animalsToAdd) {
+            animals.add(animal);
+            map.place(animal);
+        }
+        numOfAnimals += animalsToAdd.size();
+    }
+    private void makeMagic(){
+        ArrayList<Animal> animalsToCopy = new ArrayList<>();
+        for(Animal a:animals){
+            int x = getRandomNumber(0,map.getWidth()+1);
+            int y = getRandomNumber(0,map.getHeight()+1);
+            Animal copy = new Animal(map,new Vector2d(x,y),"copy",null,null,a);
+            animalsToCopy.add(copy);
+            if (genes.get(copy.getStringGenes()) != null){
+                genes.put(copy.getStringGenes(),genes.get(copy.getStringGenes())+1);
+            }
+            else{
+                genes.put(copy.getStringGenes(), 1);
+            }
+        }
+        for (Animal animal: animalsToCopy) {
+            animals.add(animal);
+            map.place(animal);
+        }
+        dominantGenotype = countDominantGenotype();
+        Platform.runLater(() -> {
+            forGenes.setText(dominantGenotype);
+        });
+        magicDays += 1;
+        numOfAnimals += 5;
+    }
+
     public void run() {
-        int magicDays = 0;
-        Integer days = 0;
         int j = 0;
-        int numOfDeadAnimals = 0;
-        int lifeLengthOfDeadAnimals = 0;
         while (numOfAnimals>0){
             try {
                 synchronized (this){
@@ -150,37 +246,22 @@ public class SimulationEngine implements IEngine,Runnable{
             animals.get(j).move(animals.get(j).getMove());
             //zmniejszam mu energie, ktora zuzyl na ruch
             animals.get(j).energy -= map.getMoveEnergy();
+
             j+=1;
+            //koniec dnia
             if (j == animals.size()){
                 Platform.runLater(() -> {
                     magInf.takeAwayMagic();
                 });
                 j = 0;
-                ArrayList<Animal> animalsToRemove = new ArrayList<>();
+
                 //usuwam martwe zwierzeta
-                for(Animal a:animals)
-                {
-                    if(a.energy <= 0){
-                        animalsToRemove.add(a);
-                        if(genes.get(a.getStringGenes())-1 == 0){
-                            genes.remove(a.getStringGenes());
-                        }
-                        else{
-                            genes.put(a.getStringGenes(),genes.get(a.getStringGenes())-1);
-                        }
-                        numOfDeadAnimals += 1;
-                        lifeLengthOfDeadAnimals += a.lifeLength;
-                    }
-                }
-                for (Animal a: animalsToRemove) {
-                    animals.remove(a);
-                    map.removeElement(a,a.getPosition());
-                }
+                removeDeadAnimals();
                 dominantGenotype = countDominantGenotype();
                 Platform.runLater(() -> {
                     forGenes.setText(dominantGenotype);
                 });
-                numOfAnimals -= animalsToRemove.size();
+
 
                 //dodaje dzien do dlugosci zycia tych, ktore przezyly
                 for(Animal a:animals) {
@@ -188,76 +269,23 @@ public class SimulationEngine implements IEngine,Runnable{
                 }
 
                 //dodaje energie z roslinek
-                ArrayList<Grass> grassToRemove = new ArrayList<>();
-                for (Vector2d pos: map.getmapElements().keySet()){
-                    if (map.isGrass(pos) != null){
-                        ArrayList<Animal> strongest = map.getBest(pos);
-                        for (Animal a:strongest){
-                            a.addEnergy(map.getPlantEnergy()/strongest.size());
-                        }
-                        if (strongest.size() != 0){
-                            grassToRemove.add((Grass) map.isGrass(pos));
-                        }
-
-                    }
-                }
-                if (grassToRemove.size() != 0){
-                    for(Grass g:grassToRemove){
-                        map.removeElement(g,g.getPosition());
-                    }
-
-                }
+                addGrassEnergy();
 
                 //rozmnazam zwierzatka
-                ArrayList<Animal> animalsToAdd = new ArrayList<>();
-                for (Vector2d pos: map.getmapElements().keySet()){
-                    if (map.getParents(pos) != null){
-                        Animal[] parents = map.getParents(pos);
-                        if (parents[0].getEnergy() >= 0.5*map.getStartEnergy() && parents[1].getEnergy() >= 0.5*map.getStartEnergy())
-                        {
-                            parents[0].numOfChildren += 1;
-                            parents[1].numOfChildren += 1;
-                            Animal child = new Animal(map,pos,"c",parents[0],parents[1],null);
-                            animalsToAdd.add(child);
-                            if (genes.get(child.getStringGenes()) != null){
-                                genes.put(child.getStringGenes(),genes.get(child.getStringGenes())+1);
-                            }
-                            else{
-                                genes.put(child.getStringGenes(), 1);
-                            }
-                        }
-                    }
-                }
-                for (Animal animal: animalsToAdd) {
-                    animals.add(animal);
-                    map.place(animal);
-                }
+                reproduceAnimals();
                 dominantGenotype = countDominantGenotype();
                 Platform.runLater(() -> {
                     forGenes.setText(dominantGenotype);
                 });
-                numOfAnimals += animalsToAdd.size();
-
                 //jesli magiczna i jest 5 zwierzatek to dodaje je do mapy
                 if (magic && magicDays < 3 && numOfAnimals == 5) {
                     Platform.runLater(() -> {
                         magInf.giveMagic();
                     });
-                    ArrayList<Animal> animalsToCopy = new ArrayList<>();
-                    for(Animal a:animals){
-                        int x = getRandomNumber(0,map.getWidth()+1);
-                        int y = getRandomNumber(0,map.getHeight()+1);
-                        Animal copy = new Animal(map,new Vector2d(x,y),"copy",null,null,a);
-                        animalsToCopy.add(copy);
-                    }
-                    for (Animal animal: animalsToCopy) {
-                        animals.add(animal);
-                        map.place(animal);
-                    }
-                    magicDays += 1;
-                    numOfAnimals += 5;
+                    makeMagic();
 
                 }
+
                 //dodaje trawke
                 map.addGrass(1);
                 map.addJungleGrass(1);
@@ -277,12 +305,10 @@ public class SimulationEngine implements IEngine,Runnable{
                 Platform.runLater(() -> {
                     allCharts.getCharts().get(0).addData(finalDays.toString(),numOfAnimals);
                 });
-                Integer finalDays1 = days;
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(1).addData(finalDays1.toString(),map.getNumOfGrass());
+                    allCharts.getCharts().get(1).addData(finalDays.toString(),map.getNumOfGrass());
                 });
                 int finalAllEnergy = allEnergy;
-                Integer finalDays2 = days;
                 float res3 = 0;
                 float res5 = 0;
                 int finalAllChildren = allChildren;
@@ -292,11 +318,10 @@ public class SimulationEngine implements IEngine,Runnable{
                 }
                 float finalRes = res3;
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(2).addData(finalDays2.toString(), finalRes);
+                    allCharts.getCharts().get(2).addData(finalDays.toString(), finalRes);
                 });
                 int finalNumOfDeadAnimals = numOfDeadAnimals;
                 int finalLifeLengthOfDeadAnimals = lifeLengthOfDeadAnimals;
-                Integer finalDays3 = days;
                 float res4;
                 if (finalNumOfDeadAnimals != 0){
                     res4 = (float) finalLifeLengthOfDeadAnimals / finalNumOfDeadAnimals;
@@ -305,12 +330,11 @@ public class SimulationEngine implements IEngine,Runnable{
                     res4 = (float) 0.0;
                 }
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(3).addData(finalDays3.toString(), res4);
+                    allCharts.getCharts().get(3).addData(finalDays.toString(), res4);
                 });
-                Integer finalDays5 = days;
                 float finalRes1 = res5;
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(4).addData(finalDays5.toString(), finalRes1);
+                    allCharts.getCharts().get(4).addData(finalDays.toString(), finalRes1);
                 });
                 toFile.add(new String[]{String.valueOf(numOfAnimals),String.valueOf(map.getNumOfGrass()),String.valueOf(res3),
                         String.valueOf(res4),String.valueOf(res5)});
