@@ -1,4 +1,6 @@
-package agh.ics.oop;
+package agh.ics.oop.interfaces;
+
+import agh.ics.oop.data.Vector2d;
 
 public interface IMapElement {
     public Vector2d getPosition();
@@ -8,4 +10,6 @@ public interface IMapElement {
     int getIndex();
 
     int getEnergyIndex();
+
+    Object getStringGenes();
 }

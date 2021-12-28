@@ -1,9 +1,7 @@
 package agh.ics.oop.gui;
 
-import agh.ics.oop.IWorldMap;
-import agh.ics.oop.gui.Chart;
+import agh.ics.oop.interfaces.IWorldMap;
 import javafx.scene.chart.LineChart;
-
 import java.util.ArrayList;
 
 public class AllCharts {
@@ -22,10 +20,8 @@ public class AllCharts {
         }
         return lineCharts;
     }
-
     public ArrayList<Chart> getCharts(){
         return charts;
     }
-
 
 }

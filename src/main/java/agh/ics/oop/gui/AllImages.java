@@ -1,10 +1,9 @@
 package agh.ics.oop.gui;
 
 import javafx.scene.image.Image;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
+//klasa zawierajaca wszystkie obrazki, ktore sa potem wyswietlane
 public class AllImages {
     public Image[] dog = new Image[8];
     public Image[] energy = new Image[5];

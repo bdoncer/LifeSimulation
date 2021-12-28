@@ -1,30 +1,9 @@
-package agh.ics.oop;
+package agh.ics.oop.data;
 
 public enum MapDirection {
     N,NE,E,SE,S,SW,W,NW;
-    public String toString(){
-        switch(this) {
-            case N:
-                return "Północ";
-            case S:
-                return "Południe";
-            case W:
-                return "Zachód";
-            case E:
-                return "Wschód";
-            case NE:
-                return "Północny-wschód";
-            case SE:
-                return "Południowy-wschód";
-            case SW:
-                return "Południowy-zachód";
-            case NW:
-                return "Północny-wschód";
-
-        }
-        return null;
-    }
-    MapDirection next(){
+    //zwraca kolejny kierunek zgodnie z ruchem wskazowek zegara
+    public MapDirection next(){
         switch(this) {
             case N:
                 return MapDirection.NE;
@@ -45,7 +24,8 @@ public enum MapDirection {
         }
         return null;
     }
-    MapDirection previous(){
+    //zwraca kolejny kierunek przeciwnie do ruchu wskazowek zegara
+    public MapDirection previous(){
         switch(this) {
             case N:
                 return MapDirection.NW;
@@ -66,7 +46,8 @@ public enum MapDirection {
         }
         return null;
     }
-    Vector2d toUnitVector(){
+    //zwraca przesuniecie po wykonaniu kroku
+    public Vector2d toUnitVector(){
         int x=0;
         int y=0;
         switch(this) {

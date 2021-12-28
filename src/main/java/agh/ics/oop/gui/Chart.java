@@ -29,7 +29,4 @@ public class Chart {
         return chart;
     }
 
-    public XYChart.Series<String, Number> getSeries() {
-        return series;
-    }
 }

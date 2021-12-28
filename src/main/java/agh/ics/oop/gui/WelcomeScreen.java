@@ -5,7 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
-
+//klasa do uzyskiwania parametrow wejsciowych, ktore wpisuje uzytkownik
 public class WelcomeScreen {
     VBox welcomeScreen = new VBox();
     TextArea widthText = new TextArea("8");
@@ -14,7 +14,7 @@ public class WelcomeScreen {
     TextArea startEnergyText = new TextArea("10");
     TextArea moveEnergyText = new TextArea("1");
     TextArea plantEnergyText = new TextArea("2");
-    TextArea startAnimalsText = new TextArea("3");
+    TextArea startAnimalsText = new TextArea("10");
     TextArea isMagicText = new TextArea("False");
     public WelcomeScreen(App app){
         Button startButton = new Button("Rozpocznij symulacje :))");
@@ -83,6 +83,5 @@ public class WelcomeScreen {
     public boolean giveIsMagic(){
         return Boolean.parseBoolean(isMagicText.getText());
     }
-
 
 }

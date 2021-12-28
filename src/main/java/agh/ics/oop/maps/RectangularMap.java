@@ -1,6 +1,9 @@
 //to ze sztywnymi krawedziami
 
-package agh.ics.oop;
+package agh.ics.oop.maps;
+
+import agh.ics.oop.data.Vector2d;
+import agh.ics.oop.interfaces.IWorldMap;
 
 public class RectangularMap extends AbstractWorldMap implements IWorldMap {
     public RectangularMap(int width,int height, double jungleRatio,int startEnergy,int moveEnergy,int plantEnergy){

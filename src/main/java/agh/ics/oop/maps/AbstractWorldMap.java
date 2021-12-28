@@ -1,25 +1,29 @@
-package agh.ics.oop;
+package agh.ics.oop.maps;
 
+import agh.ics.oop.objects.Animal;
+import agh.ics.oop.objects.Grass;
+import agh.ics.oop.data.Vector2d;
 import agh.ics.oop.gui.AllImages;
+import agh.ics.oop.interfaces.IMapElement;
+import agh.ics.oop.interfaces.IPositionChangeObserver;
+import agh.ics.oop.interfaces.IWorldMap;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObserver {
-    private final MapVisualizer visualizer = new MapVisualizer(this);
     HashMap<Vector2d, ArrayList<IMapElement>> mapElements = new HashMap<>();
     AllImages allImages;
     {
@@ -185,9 +189,6 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         removeElement(animal,animal.getPosition());
         addElement(animal,newPosition);
     }
-    public String toString(){
-        return visualizer.draw(new Vector2d(0,0), new Vector2d(width,height));
-    }
 
     //zwraca tablice najsilniejszych zwierzat na pozycji
     public ArrayList<Animal> getBest(Vector2d position){
@@ -237,7 +238,7 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
         return null;
     }
 
-    public void drawGridPane(GridPane grid) {
+    public void drawGridPane(GridPane grid,boolean areLights,String genotype) {
         Vector2d lowerLeft = new Vector2d(0,0);
         Vector2d upperRight = new Vector2d(width,height);
         int width = upperRight.x - lowerLeft.x;
@@ -278,15 +279,18 @@ public abstract class AbstractWorldMap implements IWorldMap, IPositionChangeObse
                 else{
                     Image image = allImages.dog[ob.getIndex()];
                     ImageView pic = new ImageView();
-                    pic.setFitWidth(400/(2*(dimension+2)));
-                    pic.setFitHeight(400/(2*(dimension+2)));
+                    pic.setFitWidth(400/(3*(dimension)));
+                    pic.setFitHeight(400/(3*(dimension)));
                     pic.setImage(image);
                     Image image2 = allImages.energy[ob.getEnergyIndex()];
                     ImageView pic2 = new ImageView();
                     pic2.setFitWidth(400/(dimension));
-                    pic2.setFitHeight(400/(2*(dimension+2)));
+                    pic2.setFitHeight(400/(4*(dimension)));
                     pic2.setImage(image2);
                     b = new VBox(pic,pic2);
+                    if(areLights && Objects.equals(ob.getStringGenes(), genotype)){
+                        b.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
+                    }
                     b.setAlignment(Pos.CENTER);
                     grid.add(b,ob.getPosition().x+1, height-ob.getPosition().y+1, 1, 1);
                     b.setAlignment(Pos.CENTER);

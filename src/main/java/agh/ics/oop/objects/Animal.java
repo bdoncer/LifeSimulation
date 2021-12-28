@@ -1,21 +1,26 @@
-package agh.ics.oop;
+package agh.ics.oop.objects;
 
-import java.lang.reflect.Array;
+import agh.ics.oop.data.MapDirection;
+import agh.ics.oop.data.MoveDirection;
+import agh.ics.oop.data.OptionsParser;
+import agh.ics.oop.data.Vector2d;
+import agh.ics.oop.interfaces.IWorldMap;
+import agh.ics.oop.maps.BendedMap;
+import agh.ics.oop.maps.RectangularMap;
+
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
-public class Animal extends AbstractWorldMapElement{
+public class Animal extends AbstractWorldMapElement {
     private final Animal parent1;
     private final Animal parent2;
     private MapDirection orientation;
     private final IWorldMap map;
-    float energy;
-    int lifeLength;
-    int numOfChildren;
-    Integer[] genes = new Integer[32];
+    public float energy;
+    public int lifeLength;
+    public int numOfChildren;
+    public Integer[] genes = new Integer[32];
 
-    public Animal(IWorldMap map,Vector2d initialPosition,String type,Animal parent1,Animal parent2,Animal toCopy){
+    public Animal(IWorldMap map, Vector2d initialPosition, String type, Animal parent1, Animal parent2, Animal toCopy){
         this.position = initialPosition;
         this.map = map;
         this.parent1 = parent1;
@@ -35,7 +40,7 @@ public class Animal extends AbstractWorldMapElement{
         //jesli zwierze urodzilo sie w czasie symulacji
         if (type.equals("c")){
             this.makeChildrenGenes();
-            this.energy = (float) (1/4)* parent1.energy + (1/4)* parent2.energy;
+            this.energy = (float) 0.25* parent1.energy + (float) 0.25* parent2.energy;
         }
         //jesli zwierze jest kopia
         if (type.equals("copy")){
@@ -50,8 +55,8 @@ public class Animal extends AbstractWorldMapElement{
         return this.orientation;
     }
 
-    public Integer[] getGenes(){
-        return this.genes;
+    public String getStringGenes(){
+        return Arrays.toString(this.genes);
     }
 
     public int getRandomNumber(int min, int max) {
@@ -62,6 +67,7 @@ public class Animal extends AbstractWorldMapElement{
         for (int i=0;i<32;i++){
             this.genes[i] = getRandomNumber(0,8);
         }
+        Arrays.sort(this.genes);
     }
     private void makeChildrenGenes() {
         float allEnergy = parent1.energy + parent2.energy;
@@ -93,9 +99,10 @@ public class Animal extends AbstractWorldMapElement{
                 this.genes[j] = parent1.genes[j];
             }
         }
+        Arrays.sort(this.genes);
         //rodzice musza stracic energie na dziecko
-        parent1.energy = (3/4)*parent1.energy;
-        parent2.energy = (3/4)*parent2.energy;
+        parent1.energy = (float) 0.75*parent1.energy;
+        parent2.energy = (float) 0.75*parent2.energy;
     }
     public float getEnergy(){
         return this.energy;

@@ -1,9 +1,7 @@
-package agh.ics.oop;
-
-import java.util.ArrayList;
-import java.util.Objects;
+package agh.ics.oop.data;
 
 public class OptionsParser {
+    //zamienia liczby na ruchy
     public MoveDirection parse(int num) {
         MoveDirection res=MoveDirection.R;
         if (num == 0) {

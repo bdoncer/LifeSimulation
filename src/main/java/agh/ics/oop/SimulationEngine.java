@@ -1,16 +1,21 @@
 package agh.ics.oop;
 
+import agh.ics.oop.data.CvsFile;
+import agh.ics.oop.data.Vector2d;
 import agh.ics.oop.gui.AllCharts;
 import agh.ics.oop.gui.MagicInformation;
+import agh.ics.oop.interfaces.IEngine;
+import agh.ics.oop.interfaces.IEngineMoveObserver;
+import agh.ics.oop.maps.AbstractWorldMap;
+import agh.ics.oop.maps.BendedMap;
+import agh.ics.oop.maps.RectangularMap;
+import agh.ics.oop.objects.Animal;
+import agh.ics.oop.objects.Grass;
 import javafx.application.Platform;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class SimulationEngine implements IEngine,Runnable{
@@ -22,15 +27,22 @@ public class SimulationEngine implements IEngine,Runnable{
     boolean isPaused = false;
     int numOfAnimals;
     AllCharts allCharts;
-    ArrayList<Animal> animals = new ArrayList<Animal>();
+    ArrayList<Animal> animals = new ArrayList<>();
     MagicInformation magInf;
-    public SimulationEngine(AbstractWorldMap map, int startAnimals, int moveDelay, boolean isMagic, AllCharts allCharts, MagicInformation magic){
+    ArrayList<String[]> toFile = new ArrayList<>();
+    HashMap<String, Integer> genes = new HashMap();
+    boolean toCsv = false;
+    String dominantGenotype;
+    Label forGenes;
+
+    public SimulationEngine(AbstractWorldMap map, int startAnimals, int moveDelay, boolean isMagic, AllCharts allCharts, MagicInformation magic,Label forGenes){
         this.map = map;
         this.moveDelay = moveDelay;
         this.magic = isMagic;
         this.startAnimals = startAnimals;
         this.allCharts = allCharts;
         this.magInf = magic;
+        this.forGenes = forGenes;
         int width = map.getWidth();
         int height = map.getHeight();
         numOfAnimals = this.startAnimals;
@@ -44,9 +56,20 @@ public class SimulationEngine implements IEngine,Runnable{
                 Animal animal = new Animal(map,new Vector2d(x,y),"s",null,null,null);
                 map.place(animal);
                 animals.add(animal);
+                if (genes.get(animal.getStringGenes()) != null){
+                    genes.put(animal.getStringGenes(),genes.get(animal.getStringGenes())+1);
+                }
+                else{
+                    genes.put(animal.getStringGenes(), 1);
+                }
                 i+=1;
             }
         }
+        dominantGenotype = countDominantGenotype();
+        Platform.runLater(() -> {
+            forGenes.setText(dominantGenotype);
+        });
+
     }
 
     public void pauseThread(){
@@ -74,6 +97,37 @@ public class SimulationEngine implements IEngine,Runnable{
         observers.remove(observer);
     }
 
+
+    private void writeToCsv(int day,ArrayList<String[]> toFile){
+        CvsFile cvs = null;
+        if (map instanceof RectangularMap)
+        {
+            cvs = new CvsFile("RectangularMap_"+String.valueOf(day));
+        }
+        if (map instanceof BendedMap)
+        {
+            cvs = new CvsFile("BendedMap_"+String.valueOf(day));
+        }
+        cvs.dataToFile(toFile);
+    }
+
+    public void setCsv(){
+        toCsv = true;
+    }
+    private String countDominantGenotype(){
+        int maxGenes = 0;
+        String bestGenes = null;
+        for (String key: genes.keySet()){
+            if(maxGenes < genes.get(key)){
+                maxGenes = genes.get(key);
+                bestGenes = key;
+            }
+        }
+        return bestGenes;
+    }
+    public String getDominantGenotype(){
+        return dominantGenotype;
+    }
 
     public void run() {
         int magicDays = 0;
@@ -108,6 +162,12 @@ public class SimulationEngine implements IEngine,Runnable{
                 {
                     if(a.energy <= 0){
                         animalsToRemove.add(a);
+                        if(genes.get(a.getStringGenes())-1 == 0){
+                            genes.remove(a.getStringGenes());
+                        }
+                        else{
+                            genes.put(a.getStringGenes(),genes.get(a.getStringGenes())-1);
+                        }
                         numOfDeadAnimals += 1;
                         lifeLengthOfDeadAnimals += a.lifeLength;
                     }
@@ -116,6 +176,10 @@ public class SimulationEngine implements IEngine,Runnable{
                     animals.remove(a);
                     map.removeElement(a,a.getPosition());
                 }
+                dominantGenotype = countDominantGenotype();
+                Platform.runLater(() -> {
+                    forGenes.setText(dominantGenotype);
+                });
                 numOfAnimals -= animalsToRemove.size();
 
                 //dodaje dzien do dlugosci zycia tych, ktore przezyly
@@ -155,6 +219,12 @@ public class SimulationEngine implements IEngine,Runnable{
                             parents[1].numOfChildren += 1;
                             Animal child = new Animal(map,pos,"c",parents[0],parents[1],null);
                             animalsToAdd.add(child);
+                            if (genes.get(child.getStringGenes()) != null){
+                                genes.put(child.getStringGenes(),genes.get(child.getStringGenes())+1);
+                            }
+                            else{
+                                genes.put(child.getStringGenes(), 1);
+                            }
                         }
                     }
                 }
@@ -162,6 +232,10 @@ public class SimulationEngine implements IEngine,Runnable{
                     animals.add(animal);
                     map.place(animal);
                 }
+                dominantGenotype = countDominantGenotype();
+                Platform.runLater(() -> {
+                    forGenes.setText(dominantGenotype);
+                });
                 numOfAnimals += animalsToAdd.size();
 
                 //jesli magiczna i jest 5 zwierzatek to dodaje je do mapy
@@ -209,26 +283,41 @@ public class SimulationEngine implements IEngine,Runnable{
                 });
                 int finalAllEnergy = allEnergy;
                 Integer finalDays2 = days;
+                float res3 = 0;
+                float res5 = 0;
+                int finalAllChildren = allChildren;
+                if (numOfAnimals != 0){
+                    res3 = (float) finalAllEnergy /numOfAnimals;
+                    res5 =(float) finalAllChildren /numOfAnimals;
+                }
+                float finalRes = res3;
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(2).addData(finalDays2.toString(),(float) finalAllEnergy /numOfAnimals);
+                    allCharts.getCharts().get(2).addData(finalDays2.toString(), finalRes);
                 });
                 int finalNumOfDeadAnimals = numOfDeadAnimals;
                 int finalLifeLengthOfDeadAnimals = lifeLengthOfDeadAnimals;
                 Integer finalDays3 = days;
-                Integer finalDays4 = days;
+                float res4;
+                if (finalNumOfDeadAnimals != 0){
+                    res4 = (float) finalLifeLengthOfDeadAnimals / finalNumOfDeadAnimals;
+                }
+                else{
+                    res4 = (float) 0.0;
+                }
                 Platform.runLater(() -> {
-                    if (finalNumOfDeadAnimals != 0){
-                        allCharts.getCharts().get(3).addData(finalDays3.toString(),(float) finalLifeLengthOfDeadAnimals / finalNumOfDeadAnimals);
-                    }
-                    else{
-                        allCharts.getCharts().get(3).addData(finalDays4.toString(),0.0);
-                    }
+                    allCharts.getCharts().get(3).addData(finalDays3.toString(), res4);
                 });
-                int finalAllChildren = allChildren;
                 Integer finalDays5 = days;
+                float finalRes1 = res5;
                 Platform.runLater(() -> {
-                    allCharts.getCharts().get(4).addData(finalDays5.toString(),(float) finalAllChildren /numOfAnimals);
+                    allCharts.getCharts().get(4).addData(finalDays5.toString(), finalRes1);
                 });
+                toFile.add(new String[]{String.valueOf(numOfAnimals),String.valueOf(map.getNumOfGrass()),String.valueOf(res3),
+                        String.valueOf(res4),String.valueOf(res5)});
+                if(toCsv == true){
+                    writeToCsv(days,toFile);
+                }
+                toCsv = false;
             }
             for(IEngineMoveObserver obs:observers){
                 obs.mapChanged(map);
