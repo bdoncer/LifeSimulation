@@ -18,7 +18,7 @@ public class WelcomeScreen {
     TextArea isMagic1Text = new TextArea("False");
     TextArea isMagic2Text = new TextArea("False");
     public WelcomeScreen(App app){
-        Button startButton = new Button("Rozpocznij symulacje :))");
+        Button startButton = new Button("Start simulation :))");
         startButton.setOnAction(event -> {
             app.startSimulation();
         });
