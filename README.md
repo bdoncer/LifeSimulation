@@ -25,8 +25,8 @@ https://github.com/apohllo/obiektowe-lab/tree/master/proj1
 
 ### Start Screen
 
-<img src="main/resources/start_screen.gif" />
+<img src="scr/main/resources/start_screen.gif" />
 
 ### Main Screen
 
-<img src="main/resources/life_screen.gif" />
+<img src="scr/main/resources/life_screen.gif" />
